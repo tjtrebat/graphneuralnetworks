@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.datasets import Planetoid
 
-from models.gcn import GCN
+from models import GCN, ChebNet
 
 
 dataset_names = ['Cora', 'CiteSeer', 'PubMed']
@@ -22,10 +22,10 @@ def print_dataset_stats(dataset):
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def test_gcn(dataset):
-    model = GCN(dataset.num_node_features, dataset.num_classes).to(device)
-    data = dataset[0].to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+def evaluate(model, data):        
+    optimizer = torch.optim.Adam(model.parameters(), 
+                                 lr=0.01, 
+                                 weight_decay=5e-4)
     model.train()
     for epoch in range(200):
         optimizer.zero_grad()
@@ -33,14 +33,25 @@ def test_gcn(dataset):
         loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
         loss.backward()
         optimizer.step()
-
     model.eval()
     pred = model(data).argmax(dim=1)
     correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
     acc = int(correct) / int(data.test_mask.sum())
-    print(f'Accuracy (GCNConv): {acc:.4f}')
+    return acc    
 
 for dataset in datasets:
     print_dataset_stats(dataset)
-    test_gcn(dataset)
+    data = dataset[0].to(device)
+    models = {'GCN': GCN(dataset.num_node_features, 
+                         dataset.num_classes).to(device),
+              'ChebNet (K=1)': ChebNet(dataset.num_node_features, 
+                                       dataset.num_classes).to(device),
+              'ChebNet (K=2)': ChebNet(dataset.num_node_features, 
+                                       dataset.num_classes, K=2).to(device),
+              'ChebNet (K=3)': ChebNet(dataset.num_node_features, 
+                                       dataset.num_classes, K=3).to(device)}
+    for model_name, model in models.items():
+        acc = evaluate(model, data)
+        print(f'Accuracy ({model_name}): {acc:.4f}')
     print()
+
