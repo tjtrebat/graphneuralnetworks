@@ -37,20 +37,26 @@ def evaluate(model, data):
     pred = model(data).argmax(dim=1)
     correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
     acc = int(correct) / int(data.test_mask.sum())
-    return acc    
+    return acc   
+ 
 
 for dataset in datasets:
     print_dataset_stats(dataset)
     data = dataset[0].to(device)
-    models = {'GCN': GCN(dataset.num_node_features, 
-                         dataset.num_classes).to(device),
-              'ChebNet (K=1)': ChebNet(dataset.num_node_features, 
-                                       dataset.num_classes).to(device),
-              'ChebNet (K=2)': ChebNet(dataset.num_node_features, 
-                                       dataset.num_classes, K=2).to(device),
-              'ChebNet (K=3)': ChebNet(dataset.num_node_features, 
-                                       dataset.num_classes, K=3).to(device)}
+
+    models = {
+        'GCN': GCN(dataset.num_node_features, 
+                   dataset.num_classes),
+        'ChebNet (K=1)': ChebNet(dataset.num_node_features, 
+                                 dataset.num_classes),
+        'ChebNet (K=2)': ChebNet(dataset.num_node_features, 
+                                 dataset.num_classes, 
+                                 K=2),
+        'ChebNet (K=3)': ChebNet(dataset.num_node_features, 
+                                 dataset.num_classes, 
+                                 K=3)}
     for model_name, model in models.items():
+        model = model.to(device)
         acc = evaluate(model, data)
         print(f'Accuracy ({model_name}): {acc:.4f}')
     print()
