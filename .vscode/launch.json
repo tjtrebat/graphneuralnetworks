@@ -10,6 +10,43 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
-        }
+        },
+        {
+            "name": "Karate Club (GCN)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "karate_test.py",
+            "args": [
+                "--model",
+                "gcn",
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Karate Club (ChebNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "karate_test.py",
+            "args": [
+                "--model",
+                "cheb",
+                "--k",
+                "2"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Karate Club (SpecNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "karate_test.py",
+            "args": [
+                "--model",
+                "spec",
+                "--k",
+                "2"
+            ],
+            "console": "integratedTerminal"
+        }                
     ]
 }

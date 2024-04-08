@@ -1,9 +1,18 @@
+import argparse
+
 import torch
 import torch.nn.functional as F
 from torch_geometric.datasets import Planetoid
 
 from models import GCN, ChebNet
 
+
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset',
+                        choices=['cora', 'citeseer', 'pubmed'],
+                        help='dataset to train and evaluate models')
+    return parser
 
 dataset_names = ['Cora', 'CiteSeer', 'PubMed']
 datasets = [Planetoid(root=f'/tmp/{dataset_name}', name=dataset_name) 
@@ -21,6 +30,7 @@ def print_dataset_stats(dataset):
     print(f'Test Nodes: {data.test_mask.sum().item()}')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def evaluate(model, data):        
     optimizer = torch.optim.Adam(model.parameters(), 
