@@ -19,7 +19,7 @@ class GCN(torch.nn.Module):
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index)
-        return F.log_softmax(x, dim=1)
+        return F.softmax(x, dim=1)
 
 
 class ChebNet(torch.nn.Module):
@@ -44,6 +44,6 @@ class SpecNet(torch.nn.Module):
 
     def forward(self, data):
         x = data.x
-        x = self.conv1(x)        
+        x = self.conv1(x)    
         return F.log_softmax(x, dim=1)
     

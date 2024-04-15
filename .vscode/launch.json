@@ -176,6 +176,19 @@
                 "PubMed"
             ],
             "console": "integratedTerminal"
-        }                                                  
+        },
+        {
+            "name": "ENZYMES (GCN)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "tudataset_test.py",
+            "args": [
+                "--model",
+                "GCN",
+                "--dataset",
+                "ENZYMES"
+            ],
+            "console": "integratedTerminal"
+        },                                                       
     ]
 }

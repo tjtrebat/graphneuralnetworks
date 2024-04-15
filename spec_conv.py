@@ -15,10 +15,9 @@ class SpecConv(torch.nn.Module):
         
     def forward(self, x):
         out = self.V.T @ x
-        out = self.coeffs * out
-        out = self.V @ out
+        out = self.coeffs * out        
         out = out.sum(dim=-1, keepdim=True)        
+        out = self.V @ out
         out = out.squeeze(-1)
-        out = F.softmax(out, dim=-1).T
-        return out
+        return out.T
         
