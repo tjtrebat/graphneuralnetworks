@@ -17,12 +17,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model',
-                        choices=['gcn', 'cheb', 'spec'],
+                        choices=['GCN', 'ChebNet', 'SpecNet'],
                         help='model to train/evaluate')
     parser.add_argument('--k',
                         type=int,
                         default=3,
-                        help='number of eigenvectors (specnet) or polynomials (chebnet)')
+                        help='number of eigenvectors/polynomials')
     return parser
 
 parser = get_parser()
@@ -47,21 +47,21 @@ def get_laplacian_matrix(edge_index, num_nodes):
     laplacian[edge_index[0, :], edge_index[1, :]] = edge_weight
     return laplacian
 
-def get_eigendecomposition(laplacian, K=10):
-    _, U = eigsh(laplacian.numpy(), k=K, which='LM')
+def get_eigendecomposition(laplacian, k):
+    _, U = eigsh(laplacian.numpy(), k=k, which='LM')
     return torch.from_numpy(U)
 
 def get_specnet(dataset, k):
     data = dataset[0]
     laplacian = get_laplacian_matrix(data.edge_index, data.num_nodes)
-    U = get_eigendecomposition(laplacian).to(device)
-    model = SpecNet(dataset.num_node_features, dataset.num_classes, U[:, :k])
+    eigen = get_eigendecomposition(laplacian, k).to(device)
+    model = SpecNet(dataset.num_node_features, dataset.num_classes, eigen)
     return model
 
 def get_model(model_name, dataset, k):
-    if model_name == 'gcn':
+    if model_name == 'GCN':
         model = GCN(dataset.num_node_features, dataset.num_classes)
-    elif model_name == 'cheb':
+    elif model_name == 'ChebNet':
         model = ChebNet(dataset.num_node_features, dataset.num_classes, K=k)
     else:
         model = get_specnet(dataset, k)
@@ -89,7 +89,7 @@ def evaluate(model, data):
 
 acc = evaluate(model, data)
 model_name = args.model
-if model_name != 'gcn':
+if model_name != 'GCN':
     model_name += f' (K={args.k})'
 print(f'Accuracy ({model_name}): {acc:.4f}')
 print()

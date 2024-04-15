@@ -18,7 +18,7 @@
             "program": "karate_test.py",
             "args": [
                 "--model",
-                "gcn",
+                "GCN",
             ],
             "console": "integratedTerminal"
         },
@@ -29,7 +29,7 @@
             "program": "karate_test.py",
             "args": [
                 "--model",
-                "cheb",
+                "ChebNet",
                 "--k",
                 "2"
             ],
@@ -42,11 +42,140 @@
             "program": "karate_test.py",
             "args": [
                 "--model",
-                "spec",
+                "SpecNet",
                 "--k",
                 "2"
             ],
             "console": "integratedTerminal"
-        }                
+        },
+        {
+            "name": "Cora (GCN)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "GCN",
+                "--dataset",
+                "Cora"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Cora (ChebNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "ChebNet",
+                "--k",
+                "2",
+                "--dataset",
+                "Cora"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Cora (SpecNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "SpecNet",
+                "--k",
+                "2",
+                "--dataset",
+                "Cora"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CiteSeer (GCN)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "GCN",
+                "--dataset",
+                "CiteSeer"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CiteSeer (ChebNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "ChebNet",
+                "--k",
+                "2",
+                "--dataset",
+                "CiteSeer"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CiteSeer (SpecNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "SpecNet",
+                "--k",
+                "2",
+                "--dataset",
+                "CiteSeer"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "PubMed (GCN)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "GCN",
+                "--dataset",
+                "PubMed"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "PubMed (ChebNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "ChebNet",
+                "--k",
+                "2",
+                "--dataset",
+                "PubMed"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "PubMed (SpecNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "planetoid_test.py",
+            "args": [
+                "--model",
+                "SpecNet",
+                "--k",
+                "2",
+                "--dataset",
+                "PubMed"
+            ],
+            "console": "integratedTerminal"
+        }                                                  
     ]
 }
