@@ -189,6 +189,30 @@
                 "ENZYMES"
             ],
             "console": "integratedTerminal"
-        },                                                       
+        },
+        {
+            "name": "Flickr (GCN)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "flickr_test.py",
+            "args": [
+                "--model",
+                "GCN",
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Flickr (ChebNet)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "flickr_test.py",
+            "args": [
+                "--model",
+                "ChebNet",
+                "--k",
+                "5"
+            ],
+            "console": "integratedTerminal"
+        }                                                                   
     ]
 }

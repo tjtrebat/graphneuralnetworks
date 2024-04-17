@@ -2,7 +2,6 @@ import argparse
 
 import torch
 import torch.nn.functional as F
-from torch_geometric.utils import scatter
 from torch_geometric import seed_everything
 from torch_geometric.datasets import TUDataset
 from torch_geometric.loader import DataLoader
@@ -77,6 +76,7 @@ model = model.to(device)
 train_dataset, test_dataset = dataset[:540], dataset[540:]
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
+
 model.train()
 optimizer = torch.optim.Adam(model.parameters(), 
                                 lr=0.01, 
@@ -85,7 +85,7 @@ for epoch in range(200):
     for data in train_loader:
         optimizer.zero_grad()
         out = model(data.to(device))
-        loss = F.cross_entropy(out, data.y[data.batch])
+        loss = F.nll_loss(out, data.y[data.batch])
         loss.backward()
         optimizer.step()
 
@@ -95,13 +95,12 @@ correct = 0
 total = 0
 for data in test_loader:
     pred = model(data.to(device)).argmax(dim=1)
-    #print(pred)
-    #print(data.y[data.batch])
+    print(pred)
+    print(data.y[data.batch])
     correct += (pred == data.y[data.batch]).sum()
     total += len(data)
     #print(correct)
     #print(total)
-    #break
+
 acc = correct / total
 print(f'Accuracy: {acc:.4f}') 
-
