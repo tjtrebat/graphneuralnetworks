@@ -38,12 +38,16 @@ class ChebNet(torch.nn.Module):
         
 
 class SpecNet(torch.nn.Module):
-    def __init__(self, n_feats: int, n_classes: int, V: Tensor):
+    def __init__(self, n_feats: int, n_classes: int, U: Tensor):
         super().__init__()
-        self.conv1 = SpecConv(n_feats, n_classes, V)
+        self.conv1 = SpecConv(n_feats, 16, U)
+        self.conv2 = SpecConv(16, n_classes, U)
 
     def forward(self, data):
         x = data.x
         x = self.conv1(x)    
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        x = self.conv2(x)
         return F.log_softmax(x, dim=1)
     

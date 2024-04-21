@@ -38,8 +38,8 @@ def get_eigendecomposition(laplacian, k):
 def create_specnet_model(dataset, k, **_ignored):
     data = dataset[0]
     laplacian = get_laplacian_matrix(data.edge_index, data.num_nodes)
-    eigen = get_eigendecomposition(laplacian, k)
-    model = SpecNet(dataset.num_node_features, dataset.num_classes, eigen)
+    U = get_eigendecomposition(laplacian, k)
+    model = SpecNet(dataset.num_node_features, dataset.num_classes, U)
     return model
 
 model_factory = ModelFactory()

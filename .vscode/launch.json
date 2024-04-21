@@ -44,7 +44,7 @@
                 "--model",
                 "SpecNet",
                 "--k",
-                "2"
+                "3"
             ],
             "console": "integratedTerminal"
         },

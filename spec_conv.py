@@ -1,23 +1,24 @@
 import torch
 import torch.nn.functional as F
 from torch import Tensor
+from torch_geometric.nn.dense.linear import Linear
 
 
 class SpecConv(torch.nn.Module):
     def __init__(self, 
                  in_channels:int, 
                  out_channels: int, 
-                 V: Tensor):
+                 U: Tensor):
         super().__init__()
-        self.V = V
-        self.coeffs = torch.nn.Parameter(
-            torch.randn(out_channels, V.size(-1), in_channels))
+        self.U = U
+        self.lin = Linear(in_channels, 
+                          out_channels, 
+                          bias=False, 
+                          weight_initializer='glorot')
         
     def forward(self, x):
-        out = self.V.T @ x
-        out = self.coeffs * out        
-        out = out.sum(dim=-1, keepdim=True)        
-        out = self.V @ out
-        out = out.squeeze(-1)
-        return out.T
+        out = self.U.T @ x
+        out = self.lin(out)
+        out = self.U @ out
+        return out
         
