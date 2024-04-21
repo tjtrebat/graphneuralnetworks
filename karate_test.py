@@ -1,95 +1,69 @@
+import time
 import argparse
 
 import torch
 import torch.nn.functional as F
 from torch_geometric import seed_everything
 from torch_geometric.datasets import KarateClub
-from torch_geometric.utils import get_laplacian
-from scipy.sparse.linalg import eigsh
+from torch_geometric.logging import log
 
-from models import GCN, ChebNet, SpecNet
+from model_factory import model_factory
 
 
 seed_everything(42)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def get_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model',
-                        choices=['GCN', 'ChebNet', 'SpecNet'],
-                        help='model to train/evaluate')
-    parser.add_argument('--k',
-                        type=int,
-                        default=3,
-                        help='number of eigenvectors/polynomials')
-    return parser
+parser = argparse.ArgumentParser()
+parser.add_argument('--model',
+                    choices=['GCN', 'ChebNet', 'SpecNet'],
+                    help='model to train/evaluate')
+parser.add_argument('--k',
+                    type=int,
+                    default=3,
+                    help='number of eigenvectors/polynomials')
 
-parser = get_parser()
 args = parser.parse_args()
 
-def print_dataset_stats(dataset):
-    print(f'Dataset Size: {len(dataset)}')
-    print(f'Number of Classes: {dataset.num_classes}')
-    print(f'Number of Node Features: {dataset.num_node_features}')
-    print(dataset[0])
-
 dataset = KarateClub()
-print_dataset_stats(dataset)
-data = dataset[0]
-data = data.to(device)
+print(f'Dataset Size: {len(dataset)}')
+print(f'Number of Classes: {dataset.num_classes}')
+print(f'Number of Node Features: {dataset.num_node_features}')
+print(dataset[0])
 
-def get_laplacian_matrix(edge_index, num_nodes):
-    edge_index, edge_weight = get_laplacian(edge_index, 
-                                            normalization='sym')
+data = dataset[0].to(device)
+model = model_factory.create(args.model, dataset=dataset, k=args.k).to(device)
 
-    laplacian = torch.zeros(size=(num_nodes,) * 2)
-    laplacian[edge_index[0, :], edge_index[1, :]] = edge_weight
-    return laplacian
+optimizer = torch.optim.Adam(model.parameters(), 
+                             lr=0.01, 
+                             weight_decay=5e-4)
 
-def get_eigendecomposition(laplacian, k):
-    _, U = eigsh(laplacian.numpy(), k=k, which='LM')
-    return torch.from_numpy(U)
-
-def get_specnet(dataset, k):
-    data = dataset[0]
-    laplacian = get_laplacian_matrix(data.edge_index, data.num_nodes)
-    eigen = get_eigendecomposition(laplacian, k).to(device)
-    model = SpecNet(dataset.num_node_features, dataset.num_classes, eigen)
-    return model
-
-def get_model(model_name, dataset, k):
-    if model_name == 'GCN':
-        model = GCN(dataset.num_node_features, dataset.num_classes)
-    elif model_name == 'ChebNet':
-        model = ChebNet(dataset.num_node_features, dataset.num_classes, K=k)
-    else:
-        model = get_specnet(dataset, k)
-    return model
-
-model = get_model(args.model, dataset, args.k)
-model = model.to(device)
-
-def evaluate(model, data):        
-    optimizer = torch.optim.Adam(model.parameters(), 
-                                 lr=0.01, 
-                                 weight_decay=5e-4)
+def train():
     model.train()
-    for _ in range(200):
-        optimizer.zero_grad()
-        out = model(data)
-        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
-        loss.backward()
-        optimizer.step()
-    model.eval()
-    pred = model(data).argmax(dim=1)
-    correct = (pred == data.y).sum()
-    acc = int(correct) / len(data.y)
-    return acc  
+    optimizer.zero_grad()
+    out = model(data)
+    loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+    loss.backward()
+    optimizer.step()
+    return float(loss)
 
-acc = evaluate(model, data)
-model_name = args.model
-if model_name != 'GCN':
-    model_name += f' (K={args.k})'
-print(f'Accuracy ({model_name}): {acc:.4f}')
-print()
+@torch.no_grad()
+def test():
+    model.eval()
+    pred = model(data).argmax(dim=-1)
+    accs = []
+    for mask in [data.train_mask, torch.logical_not(data.train_mask)]:
+        accs.append(int((pred[mask] == data.y[mask]).sum()) / int(mask.sum()))
+    return accs
+
+test_acc = 0
+times = []
+for epoch in range(1, 200 + 1):
+    start = time.time()
+    loss = train()
+    train_acc, tmp_test_acc = test()
+    if tmp_test_acc > test_acc:
+        test_acc = tmp_test_acc
+    log(Epoch=epoch, Loss=loss, Train=train_acc, Test=test_acc)
+    times.append(time.time() - start)
+print(f'Median time per epoch: {torch.tensor(times).median():.4f}s')
