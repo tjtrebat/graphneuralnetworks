@@ -4,11 +4,16 @@ import argparse
 import torch
 import torch.nn.functional as F
 import torch_geometric.transforms as T
-from torch_geometric.datasets import Flickr
 from torch_geometric.logging import log
+from torch_geometric import seed_everything
+from torch_geometric.datasets import Flickr
 
-from models import GCN, ChebNet
+from models import model_factory
 
+
+seed_everything(42)
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model',
@@ -16,36 +21,26 @@ parser.add_argument('--model',
                     help='model to train/evaluate')
 parser.add_argument('--k',
                     type=int,
-                    default=2,
+                    default=1,
                     help='number of eigenvectors/polynomials')
+parser.add_argument('--dataset',
+                    choices=['Flickr'],
+                    help='dataset to train and evaluate models')
+
 args = parser.parse_args()
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 dataset = Flickr(root='/tmp/Flickr', transform=T.NormalizeFeatures())
+print(dataset)
+print(f'Dataset Size: {len(dataset)}')
+print(f'Number of Classes: {dataset.num_classes}')
+print(f'Number of Node Features: {dataset.num_node_features}')
 data = dataset[0].to(device)
+print(f'Is Undirected?: {data.is_undirected()}')
+print(f'Nodes to Train: {data.train_mask.sum().item()}')
+print(f'Validation Nodes: {data.val_mask.sum().item()}')
+print(f'Test Nodes: {data.test_mask.sum().item()}')
 
-def print_dataset_stats(dataset):
-    print(dataset)
-    print(f'Dataset Size: {len(dataset)}')
-    print(f'Number of Classes: {dataset.num_classes}')
-    print(f'Number of Node Features: {dataset.num_node_features}')
-    data = dataset[0]
-    print(f'Is Undirected?: {data.is_undirected()}')
-    print(f'Nodes to Train: {data.train_mask.sum().item()}')
-    print(f'Validation Nodes: {data.val_mask.sum().item()}')
-    print(f'Test Nodes: {data.test_mask.sum().item()}')
-
-print_dataset_stats(dataset)
-print(data)
-
-if args.model == 'GCN':
-    model = GCN(dataset.num_node_features, 
-                dataset.num_classes).to(device)
-else:
-    model = ChebNet(dataset.num_node_features, 
-                    dataset.num_classes, 
-                    K=args.k).to(device)
+model = model_factory.create(args.model, dataset=dataset, k=args.k).to(device)
 
 optimizer = torch.optim.Adam(model.parameters(), 
                              lr=0.01, 
@@ -55,7 +50,7 @@ def train():
     model.train()
     optimizer.zero_grad()
     out = model(data)
-    loss = F.cross_entropy(out[data.train_mask], data.y[data.train_mask])
+    loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
     loss.backward()
     optimizer.step()
     return float(loss)

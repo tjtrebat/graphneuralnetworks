@@ -70,7 +70,7 @@
                 "--model",
                 "ChebNet",
                 "--k",
-                "2",
+                "3",
                 "--dataset",
                 "Cora"
             ],
@@ -85,7 +85,7 @@
                 "--model",
                 "SpecNet",
                 "--k",
-                "2",
+                "3",
                 "--dataset",
                 "Cora"
             ],
@@ -113,7 +113,7 @@
                 "--model",
                 "ChebNet",
                 "--k",
-                "2",
+                "3",
                 "--dataset",
                 "CiteSeer"
             ],
@@ -128,7 +128,7 @@
                 "--model",
                 "SpecNet",
                 "--k",
-                "2",
+                "3",
                 "--dataset",
                 "CiteSeer"
             ],
@@ -156,7 +156,7 @@
                 "--model",
                 "ChebNet",
                 "--k",
-                "2",
+                "3",
                 "--dataset",
                 "PubMed"
             ],
@@ -171,22 +171,9 @@
                 "--model",
                 "SpecNet",
                 "--k",
-                "2",
+                "3",
                 "--dataset",
                 "PubMed"
-            ],
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "ENZYMES (GCN)",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "tudataset_test.py",
-            "args": [
-                "--model",
-                "GCN",
-                "--dataset",
-                "ENZYMES"
             ],
             "console": "integratedTerminal"
         },
@@ -198,6 +185,8 @@
             "args": [
                 "--model",
                 "GCN",
+                "--dataset",
+                "Flickr"
             ],
             "console": "integratedTerminal"
         },
@@ -210,7 +199,9 @@
                 "--model",
                 "ChebNet",
                 "--k",
-                "5"
+                "2",
+                "--dataset",
+                "Flickr"                
             ],
             "console": "integratedTerminal"
         }                                                                   

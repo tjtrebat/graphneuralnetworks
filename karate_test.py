@@ -3,11 +3,11 @@ import argparse
 
 import torch
 import torch.nn.functional as F
+from torch_geometric.logging import log
 from torch_geometric import seed_everything
 from torch_geometric.datasets import KarateClub
-from torch_geometric.logging import log
 
-from model_factory import model_factory
+from models import model_factory
 
 
 seed_everything(42)
@@ -20,7 +20,7 @@ parser.add_argument('--model',
                     help='model to train/evaluate')
 parser.add_argument('--k',
                     type=int,
-                    default=3,
+                    default=1,
                     help='number of eigenvectors/polynomials')
 
 args = parser.parse_args()
